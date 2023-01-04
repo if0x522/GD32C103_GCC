@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.cxgate": "c",
+        "gd32c10x.h": "c"
+    }
+}
