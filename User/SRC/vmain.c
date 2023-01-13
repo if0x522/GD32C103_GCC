@@ -1,31 +1,55 @@
 #include "main.h"
 
-void task1(void * arg){
+#define DEV_CAN_BAUD_RATE 500000
+
+void can1send(void * arg){
 	int i = 0;
+	can_msg_t(can1);
+	can1.tx_sfid = 0x751;
+	can1.tx_dlen = 8;
+	can1.tx_ff = CAN_FF_STANDARD;
+	can1.fd_flag = 1;
+	for( i = 0;i<8;i++){
+		can1.tx_data[i] = 0x23+i;
+	}
+	printf("can1 send msg\n");
 	for(;;){
-		printf("task1 : %d\n",i++);
-		vTaskDelay(600);
+		QCAN1_transmit(can1);
+		printf("send \n");
+		vTaskDelay(500);
 	}
 }
-
-void task2(void * arg){
+void can2send(void * arg){
 	int i = 0;
+	can_msg_t(can2);
+	can2.tx_sfid = 0x754;
+	can2.tx_dlen = 8;
+	can2.tx_ff = CAN_FF_STANDARD;
+	can2.fd_flag = 1;
+	for( i = 0;i<8;i++){
+		can2.tx_data[i] = 0xa3+i;
+	}
+	printf("can2 send msg\n");
 	for(;;){
-		printf("task2 : %d\n",i++);
-		vTaskDelay(200);
+		QCAN2_transmit(can2);
+		vTaskDelay(500);
 	}
 }
 
 void vmain(void){
-    rcu_periph_clock_enable(RCU_GPIOC); //打开GPIOC时钟
-	gpio_init(GPIOC, GPIO_MODE_OUT_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_13); //将PC13配置为推挽输出，最高支持50MHz
-	gpio_bit_reset(GPIOC, GPIO_PIN_13); //将PC13置低电平，点亮LED
-	xTaskCreate(task1,"task1",128,NULL,0,NULL);
-	xTaskCreate(task2,"task2",128,NULL,0,NULL);
+	can_msg_r(can1);
+	QCAN1_FD_STANDARD_conf();
+	QCAN2_FD_STANDARD_conf();
+	xTaskCreate(can1send,"can1send",256,NULL,1,NULL);
+	xTaskCreate(can2send,"can2send",256,NULL,1,NULL);
+	printf("can listen \n");
     for(;;){
-		gpio_bit_reset(GPIOC, GPIO_PIN_13); //将PC13置低电平，点亮LED
-		vTaskDelay(500);
-		gpio_bit_set(GPIOC, GPIO_PIN_13); //将PC13置高电平，熄灭LED
-		vTaskDelay(500);
+		if(QCAN1_receive(&can1,3) == Q_OK){
+			printf("can1 receive msg id%lx\tdlc%d\tdata1%x\n",can1.rx_sfid,can1.rx_dlen,can1.rx_data[0]);
+		}
+		 if(QCAN2_receive(&can1,3) == Q_OK){
+		 	printf("can1 receive msg id%lx\tdlc%d\tdata1%x\n",can1.rx_sfid,can1.rx_dlen,can1.rx_data[0]);
+		}
+		vTaskDelay(20);
 	}
 }

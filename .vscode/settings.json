@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "*.cxgate": "c",
-        "gd32c10x.h": "c"
+        "qbsp.h": "c",
+        "qcan.h": "c",
+        "main.h": "c",
+        "gd32c10x_can.h": "c"
     }
 }

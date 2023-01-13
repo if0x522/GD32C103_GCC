@@ -61,7 +61,7 @@ ENABLE_LANGUAGE(ASM)
 aux_source_directory(${PROJECT_SOURCE_DIR}/Core/Firmware/GD32C10x/Source/ UAPI_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/Core/freeRTOS/src/ RTOS_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/Core/BSP/SRC/ BSP_SRCS)
-aux_source_directory(${PROJECT_SOURCE_DIR}/Core/FATFS/SRC/ FATFS_SRC)
+# aux_source_directory(${PROJECT_SOURCE_DIR}/Core/FATFS/SRC/ FATFS_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/User/SRC/ UAPP_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/Core/main/Src/ C_SOURCES)
 # 汇编代码 
@@ -77,17 +77,16 @@ set(CMAKE_EXE_LINKER_FLAGS
 #生成Free RTOS库
 add_library(freertos ${RTOS_SRC})
 
-#生成固件库
-add_library(UAPI ${UAPI_SRC})
+
 
 #生成板级支持
-add_library(BSP ${BSP_SRCS})
+#add_library(BSP ${BSP_SRCS})
 
 #生成FATFS文件系统库
-add_library(fatfs ${FATFS_SRC})
+# add_library(fatfs ${FATFS_SRC})
 
 #生成app
-add_library(app ${UAPP_SRC})
+add_library(app ${UAPP_SRC} ${UAPI_SRC} ${BSP_SRCS})
 
 #生成二进制文件
 add_executable(${PROJECT_NAME}.elf ${C_SOURCES} ${ASM_SRC} )
@@ -95,10 +94,8 @@ add_executable(${PROJECT_NAME}.elf ${C_SOURCES} ${ASM_SRC} )
 # 链接生成最终文件
 target_link_libraries(
     ${PROJECT_NAME}.elf 
-    UAPI 
     freertos 
-    BSP 
-    fatfs 
+    # fatfs 
     app 
     )
 
