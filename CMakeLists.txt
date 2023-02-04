@@ -30,7 +30,7 @@ set(FLOAT_ABI -mfloat-abi=hard)
 set(MCU "${CPU} -mthumb ${FPU} ${FLOAT_ABI}")
 
 # 优化等级
-set(OPT "-Og")
+set(OPT "-O0")
 #set(OPT "-O3")
 
 # 编译标志

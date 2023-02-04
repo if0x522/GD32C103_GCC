@@ -50,7 +50,7 @@ void BusFault_Handler(void);
 void UsageFault_Handler(void);
 /* this function handles DebugMon exception */
 void DebugMon_Handler(void);
-/* this function handles PendSV exception */
 
+void TIMER1_IRQHandler(void);
 
 #endif /* GD32C10X_IT_H */

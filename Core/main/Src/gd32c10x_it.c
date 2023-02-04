@@ -40,6 +40,9 @@ extern can_receive_message_struct g_receive_message;
 extern FlagStatus can0_receive_flag;
 extern FlagStatus can1_receive_flag;
 
+uint16_t sys_ms = 0;
+uint32_t sys_s = 0;
+
 /*!
     \brief      this function handles NMI exception
     \param[in]  none
@@ -120,14 +123,24 @@ void DebugMon_Handler(void)
 {
 }
 
-/*!
-    \brief      this function handles PendSV exception
+ /*!
+    \brief      this function handles TIMER1 interrupt request
     \param[in]  none
     \param[out] none
     \retval     none
 */
-
-
+void TIMER1_IRQHandler(void)
+{
+    if(SET == timer_interrupt_flag_get(TIMER1, TIMER_INT_FLAG_UP)){
+        /* clear update interrupt bit */
+        timer_interrupt_flag_clear(TIMER1, TIMER_INT_FLAG_UP);
+        sys_ms++;
+        if(sys_ms == 1000){
+            sys_ms = 0;
+            sys_s++;
+        }
+    }
+}
 
 /*!
     \brief      this function handles CAN0 RX0 exception

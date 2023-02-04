@@ -1,7 +1,4 @@
 #include "main.h"
-
-// // printf函数输出缓冲区
- uint8_t printbuf[64];
 // 
  extern void vmain(void);    // 根任务函数
  
@@ -10,100 +7,107 @@
      vmain();
      vTaskDelete(NULL);
  }
- 
-int main(void){
-//    // 重映射中断向量表
-//    // SCB->VTOR = 0x08000000|bootsize;
-//    // jump2app=(void(*)())*(vu32*)(appxaddr+4);
-    dma_parameter_struct dma_init_struct;
+
+// 初始化串口
+void USART_print(void){
    // 初始化串口，定位printf
 	/* 使能相关时钟 */
-    rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_USART0);
-    rcu_periph_clock_enable(RCU_USART1);
     rcu_periph_clock_enable(RCU_DMA0);
+    rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_AF);
+    gpio_pin_remap_config(GPIO_USART0_REMAP,ENABLE);
     /* 配置串口引脚 */
-    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_9);
-    gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_10);
+    gpio_init(GPIOB, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+    gpio_init(GPIOB, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
     /* USART配置 */
     usart_deinit(USART0);
     usart_baudrate_set(USART0, 115200U);
     usart_receive_config(USART0, USART_RECEIVE_ENABLE);
     usart_transmit_config(USART0, USART_TRANSMIT_ENABLE);
     usart_enable(USART0);
-    rcu_periph_clock_enable(RCU_USART1);
-    gpio_init(GPIOA, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
-    gpio_init(GPIOA, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
-    // 开发板临时设定
-    usart_deinit(USART1);
-    usart_baudrate_set(USART1, 115200U);
-    usart_receive_config(USART1, USART_RECEIVE_ENABLE);
-    usart_transmit_config(USART1, USART_TRANSMIT_ENABLE);
-    usart_enable(USART1);
+}
 
-    // 配置dma
-    dma_deinit(DMA0,DMA_CH3);   // 初始化通道
-    dma_struct_para_init(&dma_init_struct);
-    dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
-    dma_init_struct.memory_addr = (uint32_t)printbuf;
-    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-    dma_init_struct.periph_addr = (uint32_t)&USART_DATA(USART0);
-    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-    dma_init_struct.priority = DMA_PRIORITY_HIGH;
-    dma_init_struct.number = 1;
-    dma_init(DMA0,DMA_CH3,&dma_init_struct);
-    dma_circulation_disable(DMA0, DMA_CH3);
-    dma_memory_to_memory_disable(DMA0, DMA_CH3);
-    // 开启串口dma传输
-    dma_channel_enable(DMA0,DMA_CH3);
-    usart_dma_transmit_config(USART0,USART_DENT_ENABLE);
-    printf("Initialization completen\n");
-    
-    // 串口使能
-    
+// 配置系统时钟，精准定时
+void timer_config(void){
+    timer_parameter_struct timer_initpara;
+    // 使能时钟
+    rcu_periph_clock_enable(RCU_TIMER1);
+    // 重置外设及结构体
+    timer_deinit(TIMER1);
+    timer_struct_para_init(&timer_initpara);
+    // 结构体设置中断周期为1ms
+    timer_initpara.prescaler            = 119;
+    timer_initpara.alignedmode          = TIMER_COUNTER_EDGE;
+    timer_initpara.counterdirection     = TIMER_COUNTER_UP;
+    timer_initpara.period               = 999;
+    timer_initpara.clockdivision        = TIMER_CKDIV_DIV1;
+    // 初始化时钟
+    timer_init(TIMER1,&timer_initpara);
+    // 使能中断
+    timer_interrupt_flag_clear(TIMER1,TIMER_INT_FLAG_UP);
+    timer_interrupt_enable(TIMER1,TIMER_INT_UP);
+    // 使能时钟
+    timer_enable(TIMER1);
+    // 设定优先级
+    nvic_irq_enable(TIMER1_IRQn,1,0);
+}
+
+//延时函数1ms 阻塞式，不可长时间阻塞系统
+void Qdelay_ms(uint32_t t){
+    uint16_t ms_o;
+    uint32_t s_o;
+    ms_o = t%1000;
+    s_o = (uint32_t)t/1000;
+    s_o = s_o + sys_s;
+    ms_o = ms_o + sys_ms;
+    if(ms_o >= 1000){
+        s_o++;
+        ms_o = ms_o - 1000;
+    }
+    while(s_o > sys_s){
+        ;
+    }
+    while(ms_o > sys_ms){
+        ;
+    }
+}
+
+int main(void){
+    // 设定中断优先级为4位抢占式
+    nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+    // 初始化串口
+    USART_print();
+
+    printf("Qpyue system start!\n");
+
+    // 配置系统时钟，精准定时
+    timer_config();
+    printime();
+    printf("system time start\n");
+
 	// 开始任务调度
-	nvic_priority_group_set(NVIC_PRIGROUP_PRE4_SUB0);
+	
 	xTaskCreate(root_task,"root_task",1024,NULL,configMAX_PRIORITIES,NULL);
 	vTaskStartScheduler();
 	// 不会运行到这里
-    while(1)
-	{
-		;;
-	}
+    SystemInit();
 }
 // 重定位标准输出---正式核心板
-/*
  int _write(int fd,char *ptr,int len){
-     int i = 0;
-     //等待DMA通道传输完成
-     delay_1ms(500);
-     led_set(LED3,1);
-     while(dma_flag_get(DMA0,DMA_CH3,DMA_FLAG_FTF) == RESET){
-     }
-     dma_channel_disable(DMA0,DMA_CH3);
-     // 将数据写入缓冲区
-     for(i = 0;i<len;i++){
-         printbuf[i] = (uint8_t)ptr[i];
-     }
-     dma_memory_address_config(DMA0,DMA_CH3,(uint32_t)printbuf);
-     dma_transfer_number_config(DMA0,DMA_CH3,len);
-     dma_channel_enable(DMA0,DMA_CH3);
-     return len;
-}
-*/
-
-// 开发板临时使用
-int _write(int fd,char *ptr,int len){
- 	for(int i = 0;i<len;i++){
- 		usart_data_transmit(USART1, (uint8_t)ptr[i]);
- 		while(RESET == usart_flag_get(USART1, USART_FLAG_TBE));
+    // 进入临界区
+    taskENTER_CRITICAL();
+    for(int i = 0;i<len;i++){
+ 		usart_data_transmit(USART0, (uint8_t)ptr[i]);
+ 		while(RESET == usart_flag_get(USART0, USART_FLAG_TBE));
  	}
+    // 退出临界区
+    taskEXIT_CRITICAL();
     return len;
 }
+
 // 栈溢出钩子函数
 void vApplicationStackOverflowHook( TaskHandle_t xTask,char * pcTaskName ){
-	printf("task : %s stack error\n task %s delete\n",pcTaskName,pcTaskName);
+	printf("%ld:%dtask : %s stack error. delete\n",sys_s,sys_ms,pcTaskName);
     vTaskDelete(xTask);
 }

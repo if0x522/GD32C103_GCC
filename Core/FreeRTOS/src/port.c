@@ -495,10 +495,10 @@ void xPortPendSVHandler( void )
 
 void xPortSysTickHandler( void )
 {
-    /* The SysTick runs at the lowest interrupt priority, so when this interrupt
-     * executes all interrupts must be unmasked.  There is therefore no need to
-     * save and then restore the interrupt mask value as its value is already
-     * known. */
+    /* SysTick以最低中断优先级运行，因此当该中断
+*执行所有中断都必须被屏蔽。因此，没有必要
+*保存中断掩码值，然后将其恢复为其值
+*已知。*/
     portDISABLE_INTERRUPTS();
     {
         /* Increment the RTOS tick. */

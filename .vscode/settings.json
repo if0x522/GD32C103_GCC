@@ -4,6 +4,8 @@
         "qbsp.h": "c",
         "qcan.h": "c",
         "main.h": "c",
-        "gd32c10x_can.h": "c"
+        "gd32c10x_can.h": "c",
+        "stdio.h": "c",
+        "string.h": "c"
     }
 }
