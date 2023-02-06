@@ -36,9 +36,6 @@ OF SUCH DAMAGE.
 #include "main.h"
 
 
-extern can_receive_message_struct g_receive_message;
-extern FlagStatus can0_receive_flag;
-extern FlagStatus can1_receive_flag;
 
 uint16_t sys_ms = 0;
 uint32_t sys_s = 0;
@@ -168,3 +165,5 @@ void CAN1_RX0_IRQHandler(void)
     //can_message_receive(CAN1, CAN_FIFO0, &g_receive_message);
     //can1_receive_flag = SET; 
 }
+
+

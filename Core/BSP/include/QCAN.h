@@ -11,8 +11,7 @@
 #define EXTENDED    0
 
 #include "QBSP_S.h"
-#include "gd32c10x_can.h"
-#include "userconf.h"
+
 // 内部使用函数
 void Qcan1_gpio(void);
 void Qcan2_gpio(void);

@@ -3,9 +3,10 @@
  extern void vmain(void);    // 根任务函数
  
  void root_task(void * arg){
-     printf("start root stask\n");
-     vmain();
-     vTaskDelete(NULL);
+    printime();
+    printf("root stask Create\n");
+    vmain();
+    vTaskDelete(NULL);
  }
 
 // 初始化串口
@@ -13,7 +14,6 @@ void USART_print(void){
    // 初始化串口，定位printf
 	/* 使能相关时钟 */
     rcu_periph_clock_enable(RCU_USART0);
-    rcu_periph_clock_enable(RCU_DMA0);
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_AF);
     gpio_pin_remap_config(GPIO_USART0_REMAP,ENABLE);
@@ -79,12 +79,12 @@ int main(void){
     // 初始化串口
     USART_print();
 
-    printf("Qpyue system start!\n");
+    printf("Qpyue system init!\n");
 
     // 配置系统时钟，精准定时
     timer_config();
     printime();
-    printf("system time start\n");
+    printf("system time init\n");
 
 	// 开始任务调度
 	

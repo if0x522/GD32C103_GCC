@@ -75,7 +75,7 @@ set(CMAKE_EXE_LINKER_FLAGS
 )
 
 #生成Free RTOS库
-add_library(freertos ${RTOS_SRC})
+# add_library(freertos ${RTOS_SRC})
 
 
 
@@ -86,7 +86,7 @@ add_library(freertos ${RTOS_SRC})
 # add_library(fatfs ${FATFS_SRC})
 
 #生成app
-add_library(app ${UAPP_SRC} ${UAPI_SRC} ${BSP_SRCS})
+add_library(app ${UAPP_SRC} ${UAPI_SRC} ${BSP_SRCS} ${RTOS_SRC})
 
 #生成二进制文件
 add_executable(${PROJECT_NAME}.elf ${C_SOURCES} ${ASM_SRC} )
@@ -94,7 +94,7 @@ add_executable(${PROJECT_NAME}.elf ${C_SOURCES} ${ASM_SRC} )
 # 链接生成最终文件
 target_link_libraries(
     ${PROJECT_NAME}.elf 
-    freertos 
+    # freertos 
     # fatfs 
     app 
     )
