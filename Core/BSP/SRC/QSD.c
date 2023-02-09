@@ -12,6 +12,8 @@ void QSD_SPI_Init(void){
     rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_GPIOB);
     // GPIO设定
+    rcu_periph_clock_enable(RCU_AF);
+	gpio_pin_remap_config(GPIO_SWJ_SWDPENABLE_REMAP,ENABLE);
     // CLK 和 MOSI （mcu输出模式的引脚）设定为复用推挽模式
     gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,SDC_CLK|SDC_MOSI);
     Q_logi(SDTGA,"GPIOB3 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
@@ -34,31 +36,20 @@ void QSD_SPI_Init(void){
     sdc_init.endian         = SPI_ENDIAN_MSB;           // 设置大小端模式
     spi_init(SDC_SPI,&sdc_init);   
     // 设定spi crc
-    spi_crc_polynomial_set(SDC_SPI,7); 
+    // spi_crc_polynomial_set(SDC_SPI,7); 
     // 开启crc
-    // spi_crc_on(SDC_SPIN);
+    //spi_crc_on(SDC_SPI);
     // 使能spi
     spi_enable(SDC_SPI);       
 }
 
 // SPI 读写一个字节
 uint8_t QSD_SPI_RWbyte(uint8_t txData){
-    uint8_t tmp;
     while(RESET == spi_i2s_flag_get(SDC_SPI,SPI_FLAG_TBE));
     spi_i2s_data_transmit(SDC_SPI,txData);
-    printf("tx %x\n",txData);
     while(RESET == spi_i2s_flag_get(SDC_SPI,SPI_FLAG_RBNE));
-    tmp = spi_i2s_data_receive(SDC_SPI);
-    printf("rx %x\n",tmp);
-    return tmp;
+    return  spi_i2s_data_receive(SDC_SPI);
 }
-
-void QSD_SPI_Wbyte(uint8_t txData){
-    spi_i2s_data_transmit(SDC_SPI,txData);
-    printf("tx %x\n",txData);
-    return;
-}
-
 /*
     设定spi速率
     参数：
@@ -66,6 +57,7 @@ void QSD_SPI_Wbyte(uint8_t txData){
         1   高速模式
 */
 void QSD_SPI_SetSpeed(uint8_t BAUD){
+   
     // 片选失能
     SDC_DISABLE;
     spi_parameter_struct sdc_init;
@@ -79,12 +71,14 @@ void QSD_SPI_SetSpeed(uint8_t BAUD){
     sdc_init.nss            = SPI_NSS_SOFT;             // 设置软件使能
     //sdc_init.prescale       = SPI_PSC_256;              // 预分频器设置
     sdc_init.endian         = SPI_ENDIAN_MSB; 
-    if(BAUD){
+    if(BAUD == 1){
         sdc_init.prescale       = SPI_PSC_8;
     }else{
         sdc_init.prescale       = SPI_PSC_256;
     }
     spi_init(SDC_SPI,&sdc_init);   // 重新初始化
+    // 使能spi
+    spi_enable(SDC_SPI);   
     // 使能片选
     SDC_ENABLE;
 }
@@ -101,6 +95,8 @@ void QSD_SPI_SetSpeed(uint8_t BAUD){
 uint8_t SD_SendCmd(uint8_t cmd,uint32_t arg,uint8_t crc){
     uint8_t r1 = 0;
     uint8_t retry = 0;
+    // 进入临界区，
+    taskENTER_CRITICAL();
     SDC_DISABLE;
     QSD_SPI_RWbyte(0xFF);
     SDC_ENABLE;
@@ -123,6 +119,8 @@ uint8_t SD_SendCmd(uint8_t cmd,uint32_t arg,uint8_t crc){
     do{
         r1 = QSD_SPI_RWbyte(0xFF);
     }while((r1&0x80) && (retry--));
+     // 退出临界区
+    taskEXIT_CRITICAL();
     // 返回状态值
     return r1;
 }
@@ -135,11 +133,12 @@ uint8_t SD_Init(void){
     uint16_t i;
     // 初始化SPI
     QSD_SPI_Init();
+    Q_logi(SDTGA,"SPI init");
     // 配置为低速模式
     QSD_SPI_SetSpeed(0);
     // 发送至少74个脉冲
     for(i = 0;i<10;i++){
-        QSD_SPI_Wbyte(0xff);
+        QSD_SPI_RWbyte(0xff);
     }
     // 片选
     SDC_ENABLE;
@@ -167,7 +166,7 @@ uint8_t SD_Init(void){
                     r1 = SD_SendCmd(CMD41,0x40000000,0x01);
                 }while((r1)&&(i--));
                 // 鉴别SD2.0版本
-                if((r1)&&(SD_SendCmd(CMD58,0,0x01) == 0)){
+                if((i)&&(SD_SendCmd(CMD58,0,0x01) == 0)){
                     // 得到OCR值
                     for(i = 0;i<4;i++){
                         buf[i] = QSD_SPI_RWbyte(0xFF);
@@ -214,6 +213,14 @@ uint8_t SD_Init(void){
     // 配置为高速模式
     QSD_SPI_SetSpeed(1);
     if(SD_TYPE){
+        uint32_t size = 0;
+        double size_g;
+        size = SD_GetSectorCount();
+        size_g = ((((double)size)/2)/1024)/1024;
+        Q_logi(SDTGA,"SD card init");
+        printf("SD card SD card capacity is ");
+        echof(size_g,2);
+        printf(" G\n");
         return 0;
     }else{
         return 1;

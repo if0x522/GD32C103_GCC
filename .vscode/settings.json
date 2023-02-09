@@ -8,6 +8,7 @@
         "stdio.h": "c",
         "string.h": "c",
         "qlin.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "diskio.h": "c"
     }
 }

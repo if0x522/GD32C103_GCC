@@ -8,7 +8,7 @@
 
 #define bootsize    0x5000
 #define printime()  printf("[%ld:%d]",sys_s,sys_ms)
-#define Q_printmem(addr,len)   printmem(addr,len,'\t')
+#define QF_create() {FATFS QFATFS;f_mount(&QFATFS,"",1);}       // 挂载SD卡文件系统
 
 #include "gd32c10x.h"
 #include <stdio.h>
@@ -17,10 +17,9 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-// #include "ff.h"
+#include "ff.h"
 #include "QBSP.h"
 #include "userconf.h"
 
-void printmem(uint8_t * addr,uint8_t len,char s);
 
 #endif /* MAIN_H */

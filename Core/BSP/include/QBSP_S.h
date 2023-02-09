@@ -24,5 +24,13 @@ typedef enum{
     Q_ERR_CheckSum = 3,  
 }Q_s;
 
+// 打印一段地址
+void printmem(uint8_t * addr,uint8_t len,char s);
+// 打印小数
+void echof(double ff,uint8_t n);
+
+#define Q_printmem(addr,len)   printmem(addr,len,'\t')
+
+
 
 #endif

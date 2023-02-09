@@ -22,6 +22,12 @@ void LIN1_SendMsg(LIN_msg_t LINm);
 // LIN1 接收数据报文
 Q_s LIN1_ReceiveMsg(LIN_msg_t LINm,uint16_t timeo);
 
+// 初始化LIN1
+void LIN2_Init(void);
+// LIN1 发送数据报文
+void LIN2_SendMsg(LIN_msg_t LINm);
+// LIN1 接收数据报文
+Q_s LIN2_ReceiveMsg(LIN_msg_t LINm,uint16_t timeo);
 
 // 计算check sum
 uint8_t LIN_CheckSum(LIN_msg_t LINm);

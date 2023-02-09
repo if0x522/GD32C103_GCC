@@ -1,93 +1,97 @@
 /*---------------------------------------------------------------------------/
-/  FatFs Functional Configurations
+/  FatFs模块的配置
 /---------------------------------------------------------------------------*/
 
-#define FFCONF_DEF	86631	/* 版本识别 */
+#include "QBSP_S.h"
+
+#define FFCONF_DEF	80286	/* 修订ID */
 
 /*---------------------------------------------------------------------------/
 / 功能配置
 /---------------------------------------------------------------------------*/
 
 #define FF_FS_READONLY	0
-/* 这个选项开关只读配置。(0:读/写或1:只读) 　　
-
-/只读配置删除编写API函数,f_write(),f_sync(), 　　
-
-/ f_unlink(),f_mkdir(),f_chmod(),f_rename(),f_truncate(),f_getfree() 　　
-
-/写和可选的功能. */
+/* 此选项切换只读配置。（0：读/写或1：只读）
+/   只读配置删除了编写API函数f_write（）、f_sync（）、，
+/   f_nunlink（）、f_mkdir（）、f-chmod（）
+/   以及可选的书写功能  */
+  
+  
+  
 
 
 #define FF_FS_MINIMIZE	0
-/*此选项定义删除一些基本的API函数极小化水平。　　
+/* 此选项定义最小化级别以删除一些基本API函数。
+/
+/   0：基本功能已完全启用。
+/   1:f_stat（）、f_getfree（）、f-unlink（）、fs_mkdir（）、f=truncate（）和f_reame（）
+/  被移除。
+/   2: f_opendir(), f_readdir() and f_closedir() are removed in addition to 1.
+/   3: f_lseek() function is removed in addition to 2. */
 
-/ 　　
-
-/ 0:所有基本功能都是激活的。　　
-
-/ 1:f_stat(),f_getfree(),f_unlink(),f_mkdir(),f_chmod(),f_utime(), 　　
-
-/ f_truncate()和f_rename()函数删除。　　
-
-/ 2:f_opendir(),f_readdir()和f_closedir()中除了1。　　
-
-/ 3:f_lseek()函数删除除了2。*/
 
 #define FF_USE_FIND		0
-/*此选项切换过滤的目录读取函数f_findfirst（）和
-/f_findnext（）。（0:禁用，1:启用2:也使用匹配的altname[]启用）*/
+/* 此选项切换过滤的目录读取函数f_findfirst（）和
+/  f_findnext（）。（0:禁用，1:启用2:也使用匹配的altname[]启用） */
 
-#define FF_USE_MKFS		0
-/*此选项切换f_mkfs（）函数。（0：禁用或1：启用）*/
 
-#define FF_USE_FASTSEEK	0
+#define FF_USE_MKFS		1
+/* 此选项切换f_mkfs（）函数。（0：禁用或1：启用） */
+
+
+#define FF_USE_FASTSEEK	1
 /*此选项切换快速寻道功能。（0：禁用或1：启用）*/
 
+
 #define FF_USE_EXPAND	0
-/*此选项切换f_expand函数。（0：禁用或1：启用）*/
+/* 此选项切换f_expand函数。（0：禁用或1：启用） */
+
 
 #define FF_USE_CHMOD	0
-/*此选项切换属性操纵函数f_chmod（）和f_utile（）。
-/（0：禁用或1：启用）此外，FF_FS_READONLY需要为0才能启用此选项*/
+/* This option switches attribute manipulation functions, f_chmod() and f_utime().
+/  (0:Disable or 1:Enable) Also FF_FS_READONLY needs to be 0 to enable this option. */
+
 
 #define FF_USE_LABEL	0
-/*此选项切换卷标函数f_getlabel（）和f_setlabel（）。
-/（0：禁用或1：启用）*/
+/*此选项切换卷标函数f_getlabel（）和f_setlabel（）.
+/  (0:Disable or 1:Enable) */
+
 
 #define FF_USE_FORWARD	0
-/*此选项切换f_forward（）函数。（0：禁用或1：启用）*/
+/* This option switches f_forward() function. (0:Disable or 1:Enable) */
 
-#define FF_USE_STRFUNC	0
-#define FF_PRINT_LLI	0
-#define FF_PRINT_FLOAT	0
-#define FF_STRF_ENCODE	0
-/*FF_USE_STRFUNC切换字符串函数、f_gets（）、f_putc（）和f_puts（）
-/f_printf（）。
+
+#define FF_USE_STRFUNC	1
+#define FF_PRINT_LLI	1
+#define FF_PRINT_FLOAT	1
+#define FF_STRF_ENCODE	3
+/* FF_USE_STRFUNC switches string functions, f_gets(), f_putc(), f_puts() and
+/  f_printf().
 /
-/0：禁用。FF_PRINT_LLI、FF_PRINT_FLOAT和FF_STRF_ENCODE没有影响。
-/1：在不进行LF-CRLF转换的情况下启用。
-/2：通过LF-CRLF转换启用。
+/   0: Disable. FF_PRINT_LLI, FF_PRINT_FLOAT and FF_STRF_ENCODE have no effect.
+/   1: Enable without LF-CRLF conversion.
+/   2: Enable with LF-CRLF conversion.
 /
-/FF_PRINT_LLI=1使f_printf（）支持长参数，FF_PRINT_FLOAT=1/2
-使f_printf（）支持浮点参数。这些功能需要C99或更高版本。
-/当FF_LFN_UNICODE>=1且启用LFN时，字符串函数转换字符
-/在其中编码。FF_STRF_ENCODE选择文件上的字符编码假设
-/通过这些功能进行读/写。
+/  FF_PRINT_LLI = 1 makes f_printf() support long long argument and FF_PRINT_FLOAT = 1/2
+/  makes f_printf() support floating point argument. These features want C99 or later.
+/  When FF_LFN_UNICODE >= 1 with LFN enabled, string functions convert the character
+/  encoding in it. FF_STRF_ENCODE selects assumption of character encoding ON THE FILE
+/  to be read/written via those functions.
 /
-/0:当前CP中的ANSI/OEM
-/1:UTF-16LE中的Unicode
-/2:UTF-16BE中的Unicode
-/3:UTF-8中的Unicode
+/   0: ANSI/OEM in current CP
+/   1: Unicode in UTF-16LE
+/   2: Unicode in UTF-16BE
+/   3: Unicode in UTF-8
 */
 
 
 /*---------------------------------------------------------------------------/
-/ 区域设置和命名空间配置
+/ Locale and Namespace Configurations
 /---------------------------------------------------------------------------*/
 
 #define FF_CODE_PAGE	936
-/*此选项指定要在目标系统上使用的OEM代码页。
-/错误的代码页设置可能导致文件打开失败。
+/* This option specifies the OEM code page to be used on the target system.
+/  Incorrect code page setting can cause a file open failure.
 /
 /   437 - U.S.
 /   720 - Arabic
@@ -114,179 +118,183 @@
 */
 
 
-#define FF_USE_LFN		3
+#define FF_USE_LFN		0
 #define FF_MAX_LFN		255
-/*FF_USE_LFN切换对LFN（长文件名）的支持。
+/* The FF_USE_LFN switches the support for LFN (long file name).
 /
-/0：禁用LFN。FF_MAX_LFN没有影响。
-/1：在BSS上启用具有静态工作缓冲区的LFN。始终不是线程安全的。
-/2：在STACK上启用具有动态工作缓冲区的LFN。
-/3：在HEAP上启用具有动态工作缓冲区的LFN。
+/   0: Disable LFN. FF_MAX_LFN has no effect.
+/   1: Enable LFN with static  working buffer on the BSS. Always NOT thread-safe.
+/   2: Enable LFN with dynamic working buffer on the STACK.
+/   3: Enable LFN with dynamic working buffer on the HEAP.
 /
-/要启用LFN，请使用ffunicode。c需要添加到项目中。LFN函数
-/要求某些内部工作缓冲区占用（FF_MAX_LFN+1）*2字节
-/启用exFAT时，额外（FF_MAX_LFN+44）/15*32字节。
-/FF_MAX_LFN以UTF-16代码单位定义工作缓冲区的大小
-/在12到255之间。建议设置为255以完全支持LFN
-/规范。
-/当使用堆栈作为工作缓冲区时，请注意堆栈溢出。使用堆时
-/工作缓冲区的内存、内存管理函数、ff_memalloc（）和
-/ff_memfree（）是ffsystem中的示例。c、 需要添加到项目中*/
+/  To enable the LFN, ffunicode.c needs to be added to the project. The LFN function
+/  requiers certain internal working buffer occupies (FF_MAX_LFN + 1) * 2 bytes and
+/  additional (FF_MAX_LFN + 44) / 15 * 32 bytes when exFAT is enabled.
+/  The FF_MAX_LFN defines size of the working buffer in UTF-16 code unit and it can
+/  be in range of 12 to 255. It is recommended to be set it 255 to fully support LFN
+/  specification.
+/  When use stack for the working buffer, take care on stack overflow. When use heap
+/  memory for the working buffer, memory management functions, ff_memalloc() and
+/  ff_memfree() exemplified in ffsystem.c, need to be added to the project. */
 
-#define FF_LFN_UNICODE	0
-/*当启用LFN时，此选项切换API上的字符编码。
+
+#define FF_LFN_UNICODE	2
+/* This option switches the character encoding on the API when LFN is enabled.
 /
-/0:当前CP中的ANSI/OEM（TCHAR=字符）
-/1:UTF-16中的Unicode（TCHAR=WCHAR）
-/2:UTF-8中的Unicode（TCHAR=char）
-/3:UTF-32中的Unicode（TCHAR=DWORD）
+/   0: ANSI/OEM in current CP (TCHAR = char)
+/   1: Unicode in UTF-16 (TCHAR = WCHAR)
+/   2: Unicode in UTF-8 (TCHAR = char)
+/   3: Unicode in UTF-32 (TCHAR = DWORD)
 /
-/字符串I/O函数的行为也会受到此选项的影响。
-/未启用LFN时，此选项无效*/
+/  Also behavior of string I/O functions will be affected by this option.
+/  When LFN is not enabled, this option has no effect. */
+
 
 #define FF_LFN_BUF		255
 #define FF_SFN_BUF		12
-/*这组选项定义FILINFO结构中文件名成员的大小
+/* 这组选项定义FILINFO结构中文件名成员的大小
 /其用于读出目录项。这些值应足以
 /要读取的文件名。读取文件名的最大可能长度取决于
-/关于字符编码。当未启用LFN时，这些选项无效*/
+/关于字符编码。当未启用LFN时，这些选项无效。*/
+
 
 #define FF_FS_RPATH		0
-/*此选项配置对相对路径的支持。
+/* This option configures support for relative path.
 /
-/0：禁用相对路径并删除相关函数。
-/1：启用相对路径。f_chdir（）和f_chdrive（）可用。
-/2:f_getcwd（）函数除了1之外还可用。
+/   0: Disable relative path and remove related functions.
+/   1: Enable relative path. f_chdir() and f_chdrive() are available.
+/   2: f_getcwd() function is available in addition to 1.
 */
 
+
 /*---------------------------------------------------------------------------/
-/ 驱动器/卷配置
+/ Drive/Volume Configurations
 /---------------------------------------------------------------------------*/
 
 #define FF_VOLUMES		1
-/*要使用的卷（逻辑驱动器）数。(1-10) */
+/* Number of volumes (logical drives) to be used. (1-10) */
+
 
 #define FF_STR_VOLUME_ID	0
 #define FF_VOLUME_STRS		"RAM","NAND","CF","SD","SD2","USB","USB2","USB3"
-/*FF_STR_VOLUME_ID开关支持任意字符串中的卷ID。
-/当FF_STR_VOLUME_ID设置为1或2时，可以使用任意字符串作为驱动器
-/路径名中的数字。FF_VOLUME_STRS定义每个卷的卷ID字符串
-/逻辑驱动器。项目数量不得小于FF_VOLUMES。有效的
-/卷ID字符串的字符是A-Z、A-Z和0-9，但它们是
-/比较不区分大小写。如果FF_STR_VOLUME_ID>=1且FF_VOLUME_STRS为
-/未定义，用户定义的卷字符串表需要定义为：
+/* FF_STR_VOLUME_ID switches support for volume ID in arbitrary strings.
+/  When FF_STR_VOLUME_ID is set to 1 or 2, arbitrary strings can be used as drive
+/  number in the path name. FF_VOLUME_STRS defines the volume ID strings for each
+/  logical drives. Number of items must not be less than FF_VOLUMES. Valid
+/  characters for the volume ID strings are A-Z, a-z and 0-9, however, they are
+/  compared in case-insensitive. If FF_STR_VOLUME_ID >= 1 and FF_VOLUME_STRS is
+/  not defined, a user defined volume string table is needed as:
 /
-/constchar*VolumeStr[FF_VOLUMES]={“ram”，“flash”，“sd”，“usb”，。。。
+/  const char* VolumeStr[FF_VOLUMES] = {"ram","flash","sd","usb",...
 */
 
+
 #define FF_MULTI_PARTITION	0
-/*此选项切换对物理驱动器上多个卷的支持。
-/默认情况下（0），每个逻辑驱动器号都绑定到同一物理驱动器
-/编号，并且只有在物理驱动器上找到的FAT卷将被装载。
-/启用此功能时（1），每个逻辑驱动器号都可以绑定到
-/VolToPart[]中列出的任意物理驱动器和分区。还有f_fdisk（）
-/功能将可用*/
+/* This option switches support for multiple volumes on the physical drive.
+/  By default (0), each logical drive number is bound to the same physical drive
+/  number and only an FAT volume found on the physical drive will be mounted.
+/  When this function is enabled (1), each logical drive number can be bound to
+/  arbitrary physical drive and partition listed in the VolToPart[]. Also f_fdisk()
+/  function will be available. */
+
 
 #define FF_MIN_SS		512
 #define FF_MAX_SS		512
-/*这组选项配置要支持的扇区大小范围。(512,
-/1024、2048或4096）对于大多数系统、通用存储卡和
-/硬盘，但板载闪存和一些
-/光学介质类型。当FF_MAX_SS大于FF_MIN_SS时，配置FatFs
-/对于可变扇区大小模式，需要实现disk_ioctl（）函数
-/GET_SECTOR_SIZE命令*/
+/* This set of options configures the range of sector size to be supported. (512,
+/  1024, 2048 or 4096) Always set both 512 for most systems, generic memory card and
+/  harddisk, but a larger value may be required for on-board flash memory and some
+/  type of optical media. When FF_MAX_SS is larger than FF_MIN_SS, FatFs is configured
+/  for variable sector size mode and disk_ioctl() function needs to implement
+/  GET_SECTOR_SIZE command. */
+
 
 #define FF_LBA64		0
-/*此选项切换对64位LBA的支持。（0：禁用或1：启用）
-/要启用64位LBA，还需要启用exFAT。（FF_FS_EXFAT==1）*/
+/* 此选项切换对64位LBA的支持。（0：禁用或1：启用）
+/要启用64位LBA，还需要启用exFAT。（FF_FS_EXFAT==1） */
+
 
 #define FF_MIN_GPT		0x10000000
-/* Minimum number of sectors to switch GPT as partitioning format in f_mkfs and
-/  f_fdisk function. 0x100000000 max. This option has no effect when FF_LBA64 == 0. */
+/* 将GPT切换为分区格式的最小扇区数（f_mkfs和
+/f_fdisk函数。0x100000000 max.当FF_LBA64时，此选项无效==0. */
 
 
 #define FF_USE_TRIM		0
-/* This option switches support for ATA-TRIM. (0:Disable or 1:Enable)
-/  To enable Trim function, also CTRL_TRIM command should be implemented to the
-/  disk_ioctl() function. */
+/* 此选项切换对ATA-TRIM的支持。（0：禁用或1：启用）
+/要启用微调功能，还应向
+/disk_ioctl（）函数. */
 
 
 
 /*---------------------------------------------------------------------------/
-/系统配置
+/ System Configurations
 /---------------------------------------------------------------------------*/
 
 #define FF_FS_TINY		0
-/* This option switches tiny buffer configuration. (0:Normal or 1:Tiny)
-/  At the tiny configuration, size of file object (FIL) is shrinked FF_MAX_SS bytes.
-/  Instead of private sector buffer eliminated from the file object, common sector
-/  buffer in the filesystem object (FATFS) is used for the file data transfer. */
+/* 此选项切换微型缓冲区配置。（0：正常或1：微小）
+/在微小的配置中，文件对象（FIL）的大小被压缩为FF_MAX_SS字节。
+/不是从文件对象中删除私有扇区缓冲区，而是公共扇区
+/文件系统对象（FATFS）中的缓冲区用于文件数据传输。 */
 
 
 #define FF_FS_EXFAT		0
-/* This option switches support for exFAT filesystem. (0:Disable or 1:Enable)
-/  To enable exFAT, also LFN needs to be enabled. (FF_USE_LFN >= 1)
-/  Note that enabling exFAT discards ANSI C (C89) compatibility. */
+/*此选项切换对exFAT文件系统的支持。（0：禁用或1：启用）
+/要启用exFAT，还需要启用LFN。（FF_USE_LFN>=1）
+/注意，启用exFAT会丢弃ANSI C（C89）兼容性。*/
 
 
-#define FF_FS_NORTC		0
+#define FF_FS_NORTC		1
 #define FF_NORTC_MON	1
 #define FF_NORTC_MDAY	1
-#define FF_NORTC_YEAR	2020
-/* The option FF_FS_NORTC switches timestamp functiton. If the system does not have
-/  any RTC function or valid timestamp is not needed, set FF_FS_NORTC = 1 to disable
-/  the timestamp function. Every object modified by FatFs will have a fixed timestamp
-/  defined by FF_NORTC_MON, FF_NORTC_MDAY and FF_NORTC_YEAR in local time.
-/  To enable timestamp function (FF_FS_NORTC = 0), get_fattime() function need to be
-/  added to the project to read current time form real-time clock. FF_NORTC_MON,
-/  FF_NORTC_MDAY and FF_NORTC_YEAR have no effect.
-/  These options have no effect in read-only configuration (FF_FS_READONLY = 1). */
+#define FF_NORTC_YEAR	2022
+/*选项FF_FS_NORTC切换时间戳功能。如果系统没有
+/不需要RTC或有效时间戳，请设置FF_FS_NORTC=1以禁用
+/时间戳功能。FatFs修改的每个对象都有固定的时间戳
+/由当地时间中的FF_NORTC_MON、FF_NORTC_MDAY和FF_NORTC_YEAR定义。
+/要启用时间戳函数（FF_FS_NORTC=0），get_fattime（）函数需要
+/添加到项目以从实时时钟读取当前时间。FF_ NORTC_，
+/FF_NORTC_MDAY和FF_NORTC_YEAR没有影响。
+/这些选项在只读配置中无效（FF_FS_READONLY=1）. */
 
 
 #define FF_FS_NOFSINFO	0
-/* If you need to know correct free space on the FAT32 volume, set bit 0 of this
-/  option, and f_getfree() function at first time after volume mount will force
-/  a full FAT scan. Bit 1 controls the use of last allocated cluster number.
+/* 如果您需要知道FAT32卷上正确的可用空间，请将其设置为0位
+/选项，并且在卷装载后的第一次执行f_getfree（）函数将强制
+/完整的FAT扫描。位1控制最后分配的簇号的使用。
 /
-/  bit0=0: Use free cluster count in the FSINFO if available.
-/  bit0=1: Do not trust free cluster count in the FSINFO.
-/  bit1=0: Use last allocated cluster number in the FSINFO if available.
-/  bit1=1: Do not trust last allocated cluster number in the FSINFO.
+/bit0=0：如果可用，在FSINFO中使用空闲集群计数。
+/bit0=1:不信任FSINFO中的空闲群集计数。
+/bit1=0：使用FSINFO中最后分配的集群号（如果可用）。
+/bit1=1：不信任FSINFO中最后分配的群集号。
 */
 
 
 #define FF_FS_LOCK		0
-/* The option FF_FS_LOCK switches file lock function to control duplicated file open
-/  and illegal operation to open objects. This option must be 0 when FF_FS_READONLY
-/  is 1.
+/* 选项FF_FS_LOCK切换文件锁定功能以控制复制文件打开
+/以及非法操作打开对象。当FF_FS_READONLY时，此选项必须为0
+/为1。
 /
-/  0:  Disable file lock function. To avoid volume corruption, application program
-/      should avoid illegal open, remove and rename to the open objects.
-/  >0: Enable file lock function. The value defines how many files/sub-directories
-/      can be opened simultaneously under file lock control. Note that the file
-/      lock control is independent of re-entrancy. */
+/0：禁用文件锁定功能。为了避免卷损坏，应用程序
+/应避免非法打开、删除和重命名打开的对象。
+/>0：启用文件锁定功能。该值定义了多少文件/子目录
+/可以在文件锁定控制下同时打开。请注意，文件
+/锁定控制与再入无关*/
 
 
-/* #include <somertos.h>	// O/S definitions */
 #define FF_FS_REENTRANT	0
 #define FF_FS_TIMEOUT	1000
-#define FF_SYNC_t		HANDLE
-/* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
-/  module itself. Note that regardless of this option, file access to different
-/  volume is always re-entrant and volume control functions, f_mount(), f_mkfs()
-/  and f_fdisk() function, are always not re-entrant. Only file/directory access
-/  to the same volume is under control of this function.
+/* 选项FF_FS_REENTRANT切换FatF的重入（线程安全）
+/模块本身。请注意，无论此选项如何
+/音量始终是可重入的，音量控制函数f_mount（）、f_mkfs（）
+/和f_fdisk（）函数始终不可重入。仅文件/目录访问
+/到相同的体积是在这个特征的控制下。
 /
-/   0: Disable re-entrancy. FF_FS_TIMEOUT and FF_SYNC_t have no effect.
-/   1: Enable re-entrancy. Also user provided synchronization handlers,
-/      ff_req_grant(), ff_rel_grant(), ff_del_syncobj() and ff_cre_syncobj()
-/      function, must be added to the project. Samples are available in
-/      option/syscall.c.
+/0：禁用重入。FF_FS_TIMEOUT无效。
+/1：启用重新进入。此外，用户提供的同步处理器，
+/ff_mutex_create（）、ff_mutex-delete（）、ff_mutex_take（）和ff_mutex.give（）
+/函数，必须添加到项目中。示例可在ffsystem.c中获得。
 /
-/  The FF_FS_TIMEOUT defines timeout period in unit of time tick.
-/  The FF_SYNC_t defines O/S dependent sync object type. e.g. HANDLE, ID, OS_EVENT*,
-/  SemaphoreHandle_t and etc. A header file for O/S definitions needs to be
-/  included somewhere in the scope of ff.h. */
+/FF_FS_TIMEOUT以O/S时间刻度为单位定义超时时间。
+*/
 
 
 

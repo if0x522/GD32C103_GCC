@@ -192,6 +192,130 @@ Q_s LIN1_ReceiveMsg(LIN_msg_t LINm,uint16_t timeo){
     return Q_OK;
 }
 
+// 初始化LIN2
+void LIN2_Init(void){
+     // 进入临界区，
+    taskENTER_CRITICAL();
+    // 配置时钟
+	rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_GPIOD);
+	rcu_periph_clock_enable(RCU_UART4);
+	// 数据引脚设定
+	gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_12);
+    Q_logi(LINTGA,"GPIOC12 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
+    gpio_init(GPIOD, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
+	Q_logi(LINTGA,"GPIOD2 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
+    // UART配置
+    usart_deinit(LIN2_UART_NUM);
+    usart_baudrate_set(LIN2_UART_NUM, LIN_BAUD);
+    usart_receive_config(LIN2_UART_NUM, USART_RECEIVE_ENABLE);
+    usart_transmit_config(LIN2_UART_NUM, USART_TRANSMIT_ENABLE);
+	usart_lin_mode_enable(LIN2_UART_NUM);
+    usart_enable(LIN2_UART_NUM);
+	// LIN1使能引脚
+	gpio_init(GPIOC,GPIO_MODE_OUT_PP,GPIO_OSPEED_2MHZ,GPIO_PIN_7);
+	Q_logi(LINTGA,"GPIOC7 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
+    gpio_bit_set(GPIOC,GPIO_PIN_7);
+    Q_logi(LINTGA,"LIN2 ENABLE");
+    // 退出临界区
+    taskEXIT_CRITICAL();
+}
+
+// LIN2 发送数据报文
+void LIN2_SendMsg(LIN_msg_t LINm){
+	uint8_t i = 0;
+	uint8_t synch = 0x55;
+    // 进入临界区，
+    taskENTER_CRITICAL();
+	// 发送间隔场 Break
+    while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_send_break(LIN2_UART_NUM);
+	// 发送同步场 Synch
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_data_transmit(LIN2_UART_NUM,synch);
+	// 发送PID PID
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_data_transmit(LIN2_UART_NUM,cucPARITY_ID[LINm.uiID]);
+	// 发送数据场 DATA
+	for(i = 0;i<LINm.uiDLC;i++){
+		while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	    usart_data_transmit(LIN2_UART_NUM,LINm.uiData[i]);
+	}
+	// 发送校验和场 CHECK_SUM
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_data_transmit(LIN2_UART_NUM,LIN_CheckSum(LINm));
+    while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	// 退出临界区
+    taskEXIT_CRITICAL();
+}
+
+// LIN2 接收数据报文
+Q_s LIN2_ReceiveMsg(LIN_msg_t LINm,uint16_t timeo){
+    uint8_t uctemp;
+    uint8_t i;
+    uint8_t synch = 0x55;
+    uint16_t ms_o;
+    uint32_t s_o;
+    ms_o = timeo%1000;
+    s_o = (uint32_t)timeo/1000;
+    s_o = s_o + sys_s;
+    ms_o = ms_o + sys_ms;
+    if(ms_o >= 1000){
+        s_o++;
+        ms_o = ms_o - 1000;
+    }
+    // 进入临界区，
+    taskENTER_CRITICAL();
+	// 发送间隔场 Break
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_send_break(LIN2_UART_NUM);
+	// 发送同步场 Synch
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_data_transmit(LIN2_UART_NUM,synch);
+    // 发送PID PID
+	while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);    // 等待传输完成
+	usart_data_transmit(LIN2_UART_NUM,cucPARITY_ID[LINm.uiID]);
+    // 等待发送完成
+    while(usart_flag_get(LIN2_UART_NUM,USART_FLAG_TC) == RESET);
+    usart_flag_clear(LIN2_UART_NUM,USART_FLAG_RBNE);
+    // 开始接收数据
+    while((s_o > sys_s)||(ms_o > sys_ms)){
+        if(usart_flag_get(LIN2_UART_NUM,USART_FLAG_RBNE) == SET){
+            if(i<LINm.uiDLC){
+                LINm.uiData[i] = usart_data_receive(LIN2_UART_NUM);
+            }else{
+                uctemp = usart_data_receive(LIN2_UART_NUM);
+                break;
+            }
+            i++;
+            ms_o = timeo%1000;
+            s_o = (uint32_t)timeo/1000;
+            s_o = s_o + sys_s;
+            ms_o = ms_o + sys_ms;
+            if(ms_o >= 1000){
+                s_o++;
+                ms_o = ms_o - 1000;
+            }
+        }
+    }
+    // 接收完成判断数据完整性
+    if(i < LINm.uiDLC){
+        // 退出临界区
+        taskEXIT_CRITICAL();
+        return Q_ERR_TimeOut;
+    }
+    // 检查校验和
+    if(uctemp != LIN_CheckSum(LINm)){
+        // 退出临界区
+        taskEXIT_CRITICAL();
+        return Q_ERR_CheckSum;
+    }
+    // 退出临界区
+    taskEXIT_CRITICAL();
+    return Q_OK;
+}
+
+
 // 计算LIN帧校验和
 uint8_t LIN_CheckSum(LIN_msg_t LINm){
 	uint8_t i;
