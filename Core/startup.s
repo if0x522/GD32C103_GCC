@@ -3,6 +3,8 @@
   .fpu softvfp
   .thumb            /* thumb指令集 */
 
+#include "version.h"
+
 /* .global 使某方法可以被其他目标文件使用 */
 .global  g_pfnVectors
 .global  Default_Handler
@@ -188,6 +190,7 @@ g_pfnVectors:
   .word     CAN1_RX1_IRQHandler 			        /* 81:CAN1 RX1                        */                          
   .word     CAN1_EWMC_IRQHandler			        /* 82:CAN1 EWMC*/ 
   .word     USBFS_IRQHandler                  /* 83:USBFS IRQHandler  */
+  .word     _version                          /* 84:版本号记录  */
 /*******************************************************************************
 *
 * 为Default_handler的每个异常处理程序提供弱别名。

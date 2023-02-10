@@ -65,7 +65,7 @@ aux_source_directory(${PROJECT_SOURCE_DIR}/Core/FATFS/SRC/ FATFS_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/User/SRC/ UAPP_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/Core/main/Src/ C_SOURCES)
 # 汇编代码 
-set(ASM_SRC ${PROJECT_SOURCE_DIR}/Core/startup.s)
+set(ASM_SRC ${PROJECT_SOURCE_DIR}/Core/startup.S)
 
 # 链接脚本及链接器设置
 set(LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/Core/GD32C103.ld)

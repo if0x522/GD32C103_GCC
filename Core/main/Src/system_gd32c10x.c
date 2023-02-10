@@ -41,7 +41,7 @@ OF SUCH DAMAGE.
 #define __SYS_OSC_CLK     (__IRC8M)                /* main oscillator frequency */
 
 /* Vector Table base offset */
-#define VECT_TAB_OFFSET  0x00                      /* This value must be a multiple of 0x200. */
+#define VECT_TAB_OFFSET  0x7000                      /* This value must be a multiple of 0x200. */
 
 /* select a system clock by uncommenting the following line */
 /* use IRC8M */
