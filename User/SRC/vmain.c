@@ -2,7 +2,9 @@
 
 
 void vmain(void){
+  QSW_Init();
 	for(;;){
-        vTaskDelay(500);
+    QSW_Updata();
+    vTaskDelay(1000);
   }
 }

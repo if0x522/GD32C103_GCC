@@ -17,7 +17,7 @@ void Qcan1_gpio(void){
 	gpio_pin_remap_config(GPIO_CAN0_PARTIAL_REMAP,ENABLE);
 }
 void Qcan2_gpio(void){
-    /*// 使能相关时钟
+    // 使能相关时钟
     rcu_periph_clock_enable(RCU_CAN1);
     rcu_periph_clock_enable(RCU_GPIOB);
     // 设定gpio
@@ -25,20 +25,6 @@ void Qcan2_gpio(void){
     Q_logi(TGA,"GPIOB12 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
 	gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_13);
     Q_logi(TGA,"GPIOB13 GPIO_MODE_AF_PP GPIO_OSPEED_50MHZ");
-    // can0引脚重映射
-	// gpio_pin_remap_config(GPIO_CAN1_PARTIAL_REMAP,ENABLE);
-    */
-    // 使能相关时钟
-    rcu_periph_clock_enable(RCU_CAN1);
-    rcu_periph_clock_enable(RCU_GPIOB);
-    rcu_periph_clock_enable(RCU_AF);
-    // 设定gpio
-	gpio_init(GPIOB,GPIO_MODE_IPU,GPIO_OSPEED_50MHZ,GPIO_PIN_5);
-    Q_logi(TGA,"GPIOB5 GPIO_MODE_IPU GPIO_OSPEED_50MHZ");
-	gpio_init(GPIOB,GPIO_MODE_AF_PP,GPIO_OSPEED_50MHZ,GPIO_PIN_6);
-    Q_logi(TGA,"GPIOB6 GPIO_MODE_AF_PP GPIO_OSPEED_50MHZ");
-    // can0引脚重映射
-	gpio_pin_remap_config(GPIO_CAN1_REMAP,ENABLE);
 }
 
 // 接口函数

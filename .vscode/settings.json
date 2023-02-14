@@ -9,6 +9,7 @@
         "string.h": "c",
         "qlin.h": "c",
         "queue.h": "c",
-        "diskio.h": "c"
+        "diskio.h": "c",
+        "qadc.h": "c"
     }
 }
