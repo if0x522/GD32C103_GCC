@@ -44,3 +44,13 @@ void echof(double ff,uint8_t n){
 
     printf("%s",ffs);
 }
+
+// 检查两字符串是否相同
+uint8_t check_str(uint8_t * s1,uint8_t * s2,uint8_t len){
+    int i;
+    for(i = 0;i<len;i++){
+        if(s1[i] != s2[i])  return 0;
+    }
+    return 1;
+}
+

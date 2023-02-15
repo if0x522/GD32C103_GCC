@@ -28,6 +28,8 @@ typedef enum{
 void printmem(uint8_t * addr,uint8_t len,char s);
 // 打印小数
 void echof(double ff,uint8_t n);
+// 比较两个字符串是否相同
+uint8_t check_str(uint8_t * s1,uint8_t * s2,uint8_t len);
 
 #define Q_printmem(addr,len)   printmem(addr,len,'\t')
 

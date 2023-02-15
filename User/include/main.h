@@ -20,6 +20,7 @@
 #include "ff.h"
 #include "QBSP.h"
 #include "userconf.h"
+#include "upgrade.h"
 
 
 #endif /* MAIN_H */
